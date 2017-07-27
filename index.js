@@ -1,5 +1,4 @@
 var postcss = require('postcss')
-require('colors')
 
 module.exports = postcss.plugin('postcss-wrap', function (opts) {
   opts = opts || {}
@@ -10,6 +9,8 @@ module.exports = postcss.plugin('postcss-wrap', function (opts) {
     /\%$/
   ]
 
+  var selectorRequiredWarning = 'opts.selector must be specified'
+
   if (opts.skip instanceof Array) {
     selectorsBlacklist = selectorsBlacklist.concat(opts.skip)
   } else if (opts.skip instanceof RegExp) {
@@ -18,7 +19,11 @@ module.exports = postcss.plugin('postcss-wrap', function (opts) {
 
   return function (css, result) {
     if (!opts.selector) {
-      result.warn('opts.selector must be specified'.red)
+      if (typeof window === 'undefined') {
+        result.warn(require('colors/safe').red(selectorRequiredWarning))
+      } else {
+        result.warn(selectorRequiredWarning)
+      }
       return
     }
 
